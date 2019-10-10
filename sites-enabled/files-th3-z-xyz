@@ -1,0 +1,40 @@
+server {
+    root /srv/www/files-th3-z-xyz;
+    index index.html;
+
+    server_name files.th3-z.xyz;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location = /robots.txt {
+        add_header  Content-Type  text/plain;
+        return 200 "User-agent: *\nDisallow: /\n";
+    }
+
+    location ~  \.woff2$ {
+    	add_header Access-Control-Allow-Origin *;
+    }    
+
+    listen 443 ssl http2; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/files.th3-z.xyz/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/files.th3-z.xyz/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+server {
+    if ($host = files.th3-z.xyz) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+
+    server_name files.th3-z.xyz;
+    listen 80;
+    return 404; # managed by Certbot
+
+
+}

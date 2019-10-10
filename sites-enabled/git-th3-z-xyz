@@ -1,0 +1,39 @@
+server {
+	server_name git.th3-z.xyz;
+	root /srv/www/git-th3-z-xyz;
+	try_files $uri @cgit;
+	
+	location @cgit {
+		index cgit.cgi;
+		include fastcgi_params;
+		fastcgi_param	SCRIPT_FILENAME	$document_root/cgit.cgi;
+		fastcgi_pass	unix:/var/run/fcgiwrap.socket;
+		fastcgi_param	HTTP_HOST	$server_name;
+		fastcgi_param	PATH_INFO	$uri;
+		fastcgi_param	QUERY_STRING	$args;
+	}
+
+    location = /robots.txt {
+        add_header  Content-Type  text/plain;
+        return 200 "User-agent: *\nDisallow: /\n";
+    }
+
+
+    listen 443 ssl http2; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/kf2.th3-z.xyz/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/kf2.th3-z.xyz/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+server {
+    if ($host = git.th3-z.xyz) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+	listen 80;
+	server_name git.th3-z.xyz;
+    return 404; # managed by Certbot
+}

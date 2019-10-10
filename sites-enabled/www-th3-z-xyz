@@ -1,0 +1,51 @@
+server {
+    root /srv/www/www-th3-z-xyz;
+    index index.php index.html;
+    error_page 404 /404;
+
+    server_name www.th3-z.xyz;
+
+    location / {
+        try_files $uri $uri/ @extensionless-php;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+	fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    location @extensionless-php {
+        rewrite ^(.*)$ $1.php last;
+    }
+
+    location = /robots.txt {
+        add_header  Content-Type  text/plain;
+        return 200 "User-agent: *\nDisallow: /\n";
+    }
+
+    location = /favicon.ico {
+        return 301 https://files.th3-z.xyz/standing/favicon.ico;
+    }
+
+    listen 443 ssl http2; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/www.th3-z.xyz/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/www.th3-z.xyz/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+server {
+    if ($host = www.th3-z.xyz) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+
+    server_name www.th3-z.xyz;
+    listen 80;
+    return 404; # managed by Certbot
+
+
+}
